@@ -1,0 +1,21 @@
+requirements.txt
+  s_075a1c1cfcebe4::t_6d40de9bb801e9 1-6
+run.py
+  s_075a1c1cfcebe4::t_f2a7802146bbe4 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "7e25fbdc8b060bdd05c580e2635bb0f5b849aac2",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
