@@ -1,0 +1,6 @@
+crawl4ai
+pydantic
+openai
+python-dotenv
+playwright
+requests
