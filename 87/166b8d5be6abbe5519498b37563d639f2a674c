@@ -1,0 +1,25 @@
+classifier.py
+  s_075a1c1cfcebe4::t_b2efd239ae0197 1-189
+run.py
+  s_075a1c1cfcebe4::t_63c76cabda04d0 84
+  s_075a1c1cfcebe4::t_2684426befc513 89
+  s_075a1c1cfcebe4::t_7ac09b98b6b808 6-7,25,33-36,39,41-48,50-56,59,61-83,85-88
+sectors.py
+  s_075a1c1cfcebe4::t_48c7890eedfa16 37-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "87166b8d5be6abbe5519498b37563d639f2a674c",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
