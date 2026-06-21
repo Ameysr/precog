@@ -47,12 +47,18 @@ MESSAGE_COUNTS = {
 
 
 def _load_language_bank(company_name: str) -> dict | None:
-    pattern = f"{company_name.lower().replace(' ', '-')}_language_bank.json"
+    base = company_name.lower().replace(" ", "-")
+    candidates = [
+        f"{base}_language_bank.json",
+        f"{company_name.lower()}_language_bank.json",
+        f"{base.split('-')[0]}_language_bank.json",
+    ]
     for d in [DATA_DIR, OUTPUT_DIR]:
-        path = d / pattern
-        if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
+        for pattern in candidates:
+            path = d / pattern
+            if path.exists():
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
     print(f"  [!] No language bank found for {company_name}")
     return None
 
@@ -235,7 +241,7 @@ Sarcasm patterns: {random.sample(sarcasm, min(2, len(sarcasm))) if sarcasm else 
     error_scenarios = profile.error_scenarios[:5] if profile.error_scenarios else []
     agent_failures = profile.agent_failure_patterns[:5] if profile.agent_failure_patterns else []
 
-    prompt = f"""Generate {1} HIGHLY REALISTIC customer support conversation for {profile.company_name}.
+    prompt = f"""Generate 3 HIGHLY REALISTIC customer support conversations for {profile.company_name}.
 
 {emotion_instruction}
 
@@ -255,7 +261,7 @@ Real issues from this company: {', '.join(known_issues)}
 Error scenarios: {', '.join(error_scenarios)}
 Ways agent can fail: {', '.join(agent_failures)}
 
-Number of user messages: EXACTLY {num_messages} messages (this is critical)
+Each conversation should have between 3 and 12 user messages. Vary the lengths across conversations.
 
 {bank_context}
 

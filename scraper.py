@@ -52,7 +52,7 @@ def _html_to_markdown(html: str) -> str:
         tag.decompose()
     text = soup.get_text(separator="\n", strip=True)
     lines = [line.strip() for line in text.split("\n") if line.strip()]
-    return "\n".join(lines[:500])
+    return "\n".join(lines[:200])
 
 
 def discover_urls(base_url: str) -> list[str]:

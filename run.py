@@ -13,7 +13,10 @@ def main():
     if not url.startswith("http"):
         url = "https://" + url
 
-    company_name = url.split("//")[-1].split(".")[0].capitalize()
+    import re
+    domain = url.split("//")[-1].split("/")[0]
+    domain = re.sub(r"^www\.", "", domain)
+    company_name = domain.split(".")[0].capitalize()
     name_hint = input(f"Company name [{company_name}]: ").strip()
     if name_hint:
         company_name = name_hint

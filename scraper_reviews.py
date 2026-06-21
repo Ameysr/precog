@@ -196,14 +196,14 @@ def build_language_bank(
 ) -> LanguageBank:
     combined = "\n\n".join(
         f"[{r['source']}] (rating {r['rating']}): {r['text']}"
-        for r in raw_reviews[:300]
+        for r in raw_reviews[:200]
     )
 
     prompt = f"""You are analyzing real user reviews for {company_name}.
 
 Here are {len(raw_reviews)} real reviews from Google Play, Trustpilot, and Reddit:
 
-{combined[:20000]}
+{combined[:12000]}
 
 Extract a structured language bank to help generate realistic synthetic user conversations.
 Focus on capturing the MESSY, REAL patterns — not sanitized versions.
@@ -222,6 +222,33 @@ Extract:
 11. typos_common: list of common typos/autocorrect fails found
 
 Return ONLY valid JSON matching the schema."""
+
+    return call_llm(prompt, LanguageBank)
+
+
+def _generate_fallback_bank(company_name: str) -> LanguageBank:
+    schema = json.dumps({
+        "vocabulary": {"anger_words": ["word1", "word2"], "panic_words": ["word1"], "sarcasm_phrases": ["phrase1"], "hinglish_phrases": ["phrase1"]},
+        "sentence_starters": {"angry": ["starter1"], "panicked": ["starter1"], "confused": ["starter1"], "sarcastic": ["starter1"]},
+        "hinglish_examples": ["phrase1", "phrase2"],
+        "emotional_patterns": [{"emotion": "anger", "example_text": "text"}],
+        "real_complaints_cleaned": ["complaint1", "complaint2"],
+        "domain_issues": ["issue1", "issue2"],
+        "financial_terms": ["term1", "term2"],
+        "anger_words": ["word1", "word2"],
+        "panic_words": ["word1", "word2"],
+        "sarcasm_patterns": ["pattern1", "pattern2"],
+        "typos_common": ["typo1", "typo2"],
+    }, indent=2)
+
+    prompt = f"""Generate a language bank for {company_name}, a company in the insurance/fintech space.
+Since no real user reviews were available, create a realistic language bank based on industry knowledge.
+
+Return ONLY valid JSON matching this EXACT schema (field names must be identical):
+{schema}
+
+Make it feel REAL — not polite, not sanitized. Model it after real insurance complaints on Trustpilot/Reddit.
+Fill each list with 5-20 real examples. Do NOT skip any fields."""
 
     return call_llm(prompt, LanguageBank)
 
@@ -251,8 +278,18 @@ def scrape_all(
     print(f"[reviews] Total raw reviews: {len(all_reviews)}")
 
     if not all_reviews:
-        print("[!] No reviews found from any source. Language bank will be empty.")
-        return None
+        print("[!] No reviews found from any source. Generating synthetic language bank from industry profile...")
+        bank = _generate_fallback_bank(company_name)
+        bank_payload = {
+            "company": company_name,
+            "total_reviews": 0,
+            **bank.model_dump(),
+        }
+        save_json(
+            bank_payload,
+            filename=f"{company_name.lower().replace(' ', '-')}_language_bank.json",
+        )
+        return bank
 
     for r in all_reviews:
         r["text"] = _clean_review_text(r["text"])

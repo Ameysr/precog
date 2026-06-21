@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from config import GROQ_API_KEY, GROQ_MODEL
 
 _last_call = 0.0
-_MIN_INTERVAL = 1.5  # seconds between API calls to avoid rate limits
+_MIN_INTERVAL = 0.3  # seconds between API calls to avoid rate limits
 
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)

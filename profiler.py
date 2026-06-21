@@ -71,7 +71,7 @@ def _schema_example() -> dict:
 
 def build_profile(scraped_pages: dict[str, str], company_url: str) -> CompanyProfile:
     combined = "\n\n".join(
-        f"--- {title} ---\n{text[:2000]}"
+        f"--- {title} ---\n{text[:1200]}"
         for title, text in scraped_pages.items()
     )
 
@@ -82,7 +82,7 @@ def build_profile(scraped_pages: dict[str, str], company_url: str) -> CompanyPro
 Company URL: {company_url}
 
 Website content:
-{combined[:15000]}
+{combined[:10000]}
 
 Extract a structured profile needed to generate synthetic customer support conversations.
 Identify realistic user personas, common intents, frustration points, and brand voice.
