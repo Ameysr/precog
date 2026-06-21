@@ -1,0 +1,25 @@
+requirements.txt
+  s_075a1c1cfcebe4::t_141cafd9b91a6a 6
+scraper_reviews.py
+  s_075a1c1cfcebe4::t_3457cb50d60668 5,7,18,20-27,91,101,110,129-134,138,141-145,147,151-152,172-177,252-255,260,273,291,293-294
+  s_075a1c1cfcebe4::t_e151602356136b 268-272,274
+  s_075a1c1cfcebe4::t_8fc4c8fdc90a80 1-4,6,8-17,19,28-41,63-65,96-100,102-109,111-127,135-137,139-140,146,148,153-170,178-228,234,238-251,256-259,261-267,275-290,295-298
+  s_075a1c1cfcebe4::t_ec7119f9a68ea7 292
+  s_075a1c1cfcebe4::t_31930253b7e949 42-62,66-90,92-95,128,149-150,171,229-233,235-237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "b92947c3ab07608068573e19085659ec0708d9f1",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
