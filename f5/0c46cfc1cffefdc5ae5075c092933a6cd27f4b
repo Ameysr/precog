@@ -1,0 +1,40 @@
+profiler.py
+  s_075a1c1cfcebe4::t_de3abbbf1babde 74,85
+scraper.py
+  s_075a1c1cfcebe4::t_840a689d775d97 55
+scraper_reviews.py
+  s_075a1c1cfcebe4::t_446139422df310 199,206
+  s_075a1c1cfcebe4::t_3aa612ee98738e 230-243,247-248,251
+  s_075a1c1cfcebe4::t_2ee855ea425364 281
+  s_075a1c1cfcebe4::t_ab3bc7e5a06b19 229,244-246,249-250,252-255
+  s_075a1c1cfcebe4::t_c280ac00222952 282-292
+generator.py
+  s_075a1c1cfcebe4::t_b5dd5c5322719a 50-55,57-61
+  s_075a1c1cfcebe4::t_c6c89b3dc6c25f 244
+  s_075a1c1cfcebe4::t_e6ffd4f3473ed1 264
+utils.py
+  s_075a1c1cfcebe4::t_75632197c0d89b 12
+run.py
+  s_075a1c1cfcebe4::t_22f5f6150df8a5 16-19
+config.py
+  s_075a1c1cfcebe4::t_4dfed919387dc8 11
+  s_075a1c1cfcebe4::t_3a8b468262e89d 12
+.env.example
+  s_075a1c1cfcebe4::t_c83c05f3770a85 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "f50c46cfc1cffefdc5ae5075c092933a6cd27f4b",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
