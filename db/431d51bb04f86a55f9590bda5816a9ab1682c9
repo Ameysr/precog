@@ -1,0 +1,26 @@
+scraper.py
+  s_075a1c1cfcebe4::t_e3c5fc74e7bbe8 88-93,103
+  s_075a1c1cfcebe4::t_0b1a6ebc274c73 5,49-57,62,96-97,100-102
+  s_075a1c1cfcebe4::t_1b5a5736683169 106,108,110
+requirements.txt
+  s_075a1c1cfcebe4::t_b7647fbe175743 1-2
+config.py
+  s_075a1c1cfcebe4::t_5a01685f6c7cdf 4
+  s_075a1c1cfcebe4::t_0f083e7587d6d4 2-3,5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "db431d51bb04f86a55f9590bda5816a9ab1682c9",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
