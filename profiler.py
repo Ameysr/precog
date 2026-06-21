@@ -30,6 +30,10 @@ class CompanyProfile(BaseModel):
     intents: list[Intent]
     voice_guidelines: str
     high_frustration_areas: list[str]
+    domain_terminology: list[str]
+    known_issues_from_docs: list[str]
+    error_scenarios: list[str]
+    agent_failure_patterns: list[str]
 
 
 def _schema_example() -> dict:
@@ -58,6 +62,10 @@ def _schema_example() -> dict:
         ],
         "voice_guidelines": "how the company speaks",
         "high_frustration_areas": ["area1", "area2"],
+        "domain_terminology": ["term1", "term2"],
+        "known_issues_from_docs": ["issue1", "issue2"],
+        "error_scenarios": ["scenario1", "scenario2"],
+        "agent_failure_patterns": ["pattern1", "pattern2"],
     }
 
 
@@ -78,6 +86,12 @@ Website content:
 
 Extract a structured profile needed to generate synthetic customer support conversations.
 Identify realistic user personas, common intents, frustration points, and brand voice.
+
+Also extract:
+- domain_terminology: specific terms/lingo used in this industry
+- known_issues_from_docs: problems mentioned in help center / docs
+- error_scenarios: common error situations users encounter (from docs/faq)
+- agent_failure_patterns: ways customer support commonly fails (from complaints in help center pages)
 
 You MUST return JSON that matches this EXACT schema (field names must be identical):
 {schema}
