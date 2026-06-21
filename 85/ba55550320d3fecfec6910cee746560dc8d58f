@@ -1,0 +1,34 @@
+run.py
+  s_075a1c1cfcebe4::t_57bea66f68c1be 1-2
+  s_075a1c1cfcebe4::t_e0092639af9705 3
+requirements.txt
+  s_075a1c1cfcebe4::t_15d345c92d1de4 1
+README.md
+  s_075a1c1cfcebe4::t_f3b0e391cd0a59 10
+generator.py
+  s_075a1c1cfcebe4::t_7be93fef1c1939 6,8,105-119,122,127
+utils.py
+  s_075a1c1cfcebe4::t_0df75346bb71f9 23
+  s_075a1c1cfcebe4::t_9cc4f690e7e214 5,8,19-22,24-27,29-30
+  s_075a1c1cfcebe4::t_6a9fde9ad7d097 13-15
+.env.example
+  s_075a1c1cfcebe4::t_7b95252637d718 1-2
+config.py
+  s_075a1c1cfcebe4::t_c7a1dd5ff0344f 10-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "85ba55550320d3fecfec6910cee746560dc8d58f",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
