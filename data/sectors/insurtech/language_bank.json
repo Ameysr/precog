@@ -1,0 +1,175 @@
+{
+  "sector": "insurtech",
+  "source_companies": [
+    "PolicyBazaar",
+    "Acko",
+    "Digit Insurance"
+  ],
+  "total_reviews": 400,
+  "vocabulary": {
+    "anger_words": [
+      "disappointing",
+      "annoying",
+      "worst",
+      "frustrating",
+      "unfair",
+      "unprofessional",
+      "harassment",
+      "intrusive",
+      "aggressive",
+      "loan sharks"
+    ],
+    "panic_words": [
+      "fraud",
+      "scam",
+      "cheated",
+      "misled",
+      "unhelpful",
+      "deadwood",
+      "pathetic",
+      "intentionally",
+      "delayed",
+      "unresponsive"
+    ],
+    "sarcasm_phrases": [
+      "what is this nonsense bhai",
+      "either provide more context to your calling bot or remove it",
+      "I'm not going to use this application anymore",
+      "Do not trust them",
+      "Proceed at your own risk"
+    ],
+    "hinglish_phrases": [
+      "fir site kyu visit kre hai aap",
+      "Worst experience",
+      "Total waste of time and money keeping this app in phone",
+      "Sales team is hyperactive",
+      "service team is deadwood"
+    ]
+  },
+  "sentence_starters": {
+    "angry": [
+      "The worst service is",
+      "I have had the worst experience",
+      "This is one of the worst insurance broker apps",
+      "I am extremely disappointed",
+      "I am fed up with"
+    ],
+    "panicked": [
+      "Oh my god",
+      "I am shocked",
+      "I am appalled",
+      "I am speechless",
+      "I am flabbergasted"
+    ],
+    "confused": [
+      "I don't understand",
+      "I am not sure",
+      "I am confused",
+      "I am perplexed",
+      "I am baffled"
+    ],
+    "sarcastic": [
+      "Oh great",
+      "Just what I needed",
+      "Thanks for nothing",
+      "I'm so glad I used this app",
+      "This is exactly what I wanted"
+    ]
+  },
+  "hinglish_examples": [
+    "fir site kyu visit kre hai aap",
+    "Worst experience",
+    "Total waste of time and money keeping this app in phone",
+    "Sales team is hyperactive",
+    "service team is deadwood"
+  ],
+  "emotional_patterns": [
+    {
+      "emotion": "anger",
+      "example_text": "I am extremely angry with the service I received from Policybazaar."
+    },
+    {
+      "emotion": "panic",
+      "example_text": "I am shocked and appalled by the way Policybazaar handled my claim."
+    },
+    {
+      "emotion": "confusion",
+      "example_text": "I don't understand why Policybazaar is making it so difficult for me to cancel my policy."
+    },
+    {
+      "emotion": "sarcasm",
+      "example_text": "Oh great, just what I needed, another annoying call from Policybazaar."
+    }
+  ],
+  "real_complaints_cleaned": [
+    "Policybazaar's customer support is unhelpful and unresponsive.",
+    "Policybazaar's claims process is slow and inefficient.",
+    "Policybazaar's sales team is aggressive and pushy.",
+    "Policybazaar's service team is deadwood and unresponsive.",
+    "Policybazaar's website is difficult to navigate and understand."
+  ],
+  "domain_issues": [
+    "Policybazaar's website is not user-friendly.",
+    "Policybazaar's customer support is not available 24/7.",
+    "Policybazaar's claims process is not transparent.",
+    "Policybazaar's sales team is not honest about policy details.",
+    "Policybazaar's service team is not responsive to customer needs."
+  ],
+  "financial_terms": [
+    "premium",
+    "claim",
+    "refund",
+    "deductible",
+    "policy",
+    "insurance",
+    "coverage",
+    "benefit",
+    "exclusion",
+    "limit"
+  ],
+  "anger_words": [
+    "disappointing",
+    "annoying",
+    "worst",
+    "frustrating",
+    "unfair",
+    "unprofessional",
+    "harassment",
+    "intrusive",
+    "aggressive",
+    "loan sharks"
+  ],
+  "panic_words": [
+    "fraud",
+    "scam",
+    "cheated",
+    "misled",
+    "unhelpful",
+    "deadwood",
+    "pathetic",
+    "intentionally",
+    "delayed",
+    "unresponsive"
+  ],
+  "sarcasm_patterns": [
+    "Oh great, just what I needed",
+    "Thanks for nothing",
+    "I'm so glad I used this app",
+    "This is exactly what I wanted",
+    "I'm not surprised",
+    "I'm not disappointed",
+    "I'm not frustrated"
+  ],
+  "typos_common": [
+    "fir site kyu visit kre hai aap",
+    "Worst experience",
+    "Total waste of time and money keeping this app in phone",
+    "Sales team is hyperactive",
+    "service team is deadwood",
+    "policybazaar",
+    "policybazar",
+    "policy bazaaar",
+    "policy bazaar",
+    "policy bazar"
+  ]
+}

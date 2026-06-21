@@ -1,0 +1,66 @@
+{
+  "sectors": {
+    "fintech": {
+      "business_types": ["fintech", "finance", "trading", "investing", "banking", "payments"],
+      "source_companies": [
+        {"name": "Groww", "app_id": "com.nextbillion.groww"},
+        {"name": "Paytm", "app_id": "net.one97.paytm"},
+        {"name": "PhonePe", "app_id": "com.phonepe.app"}
+      ]
+    },
+    "insurtech": {
+      "business_types": ["insurance", "insurtech", "insurance / fintech"],
+      "source_companies": [
+        {"name": "PolicyBazaar", "app_id": "com.policybazaar"},
+        {"name": "Acko", "app_id": "com.acko"},
+        {"name": "Digit Insurance", "app_id": "com.godigit.digit"}
+      ]
+    },
+    "ecommerce": {
+      "business_types": ["ecommerce", "e-commerce", "retail", "marketplace", "shopping"],
+      "source_companies": [
+        {"name": "Amazon India", "app_id": "in.amazon.mShop.android.shopping"},
+        {"name": "Flipkart", "app_id": "com.flipkart.android"},
+        {"name": "Nykaa", "app_id": "com.nykaa"}
+      ]
+    },
+    "food_delivery": {
+      "business_types": ["food delivery", "food", "restaurant", "delivery", "foodtech"],
+      "source_companies": [
+        {"name": "Swiggy", "app_id": "in.swiggy.android"},
+        {"name": "Zomato", "app_id": "com.application.zomato"}
+      ]
+    },
+    "edtech": {
+      "business_types": ["education", "edtech", "learning", "elearning"],
+      "source_companies": [
+        {"name": "Byju's", "app_id": "com.byjus.thelearningapp"},
+        {"name": "Unacademy", "app_id": "com.unacademy"}
+      ]
+    },
+    "healthtech": {
+      "business_types": ["health", "healthcare", "healthtech", "medical", "wellness"],
+      "source_companies": [
+        {"name": "Practo", "app_id": "com.practo.fabric"},
+        {"name": "PharmEasy", "app_id": "com.pharmeasy"},
+        {"name": "1mg", "app_id": "com.healthkartplus.healthkart"}
+      ]
+    },
+    "logistics": {
+      "business_types": ["logistics", "delivery", "shipping", "courier", "supply chain"],
+      "source_companies": [
+        {"name": "Delhivery", "app_id": "com.delhivery"},
+        {"name": "Porter", "app_id": "com.porter.app"},
+        {"name": "Dunzo", "app_id": "com.dunzo.daily"}
+      ]
+    },
+    "saas": {
+      "business_types": ["saas", "software", "b2b", "enterprise software", "productivity"],
+      "source_companies": [
+        {"name": "Notion", "app_id": "notion.id"},
+        {"name": "Slack", "app_id": "com.slack"},
+        {"name": "Zoom", "app_id": "us.zoom.videomeetings"}
+      ]
+    }
+  }
+}

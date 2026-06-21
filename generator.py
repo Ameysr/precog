@@ -1,6 +1,6 @@
 import json
 import random
-import re
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -28,134 +28,109 @@ class ConversationBatch(BaseModel):
     conversations: list[Conversation]
 
 
-EMOTIONAL_MODES = [
-    ("rage", 0.25),
-    ("panic", 0.20),
-    ("sarcastic", 0.15),
-    ("confused", 0.15),
-    ("resigned", 0.10),
-    ("abusive", 0.10),
-    ("threatening_legal", 0.05),
+USER_CLASSES = [
+    {
+        "id": "A",
+        "name": "Professional English",
+        "pct": 0.25,
+        "desc": "Educated professional. Speaks fluent English. Formal tone. Detailed explanations. NO Hinglish. NO slang. Uses complete sentences.",
+    },
+    {
+        "id": "B",
+        "name": "Hinglish Coder",
+        "pct": 0.25,
+        "desc": "Mixed Hindi-English. Sporadic code-switching mid-sentence. Emotional. Hindi phrases woven naturally into English, not tacked on. 'Yaar yeh app kaam nahi kar raha, I've tried 5 times'.",
+    },
+    {
+        "id": "C",
+        "name": "ALL CAPS Rager",
+        "pct": 0.15,
+        "desc": "Furious. Short messages. ALL CAPS. Expletives. NO polite words. Direct, aggressive, accusatory. 'THIS APP IS A SCAM. GIVE ME MY MONEY BACK'.",
+    },
+    {
+        "id": "D",
+        "name": "Passive Aggressive",
+        "pct": 0.15,
+        "desc": "Sarcastic, cold, polite on the surface but clearly angry. 'Oh wonderful. Another error message. Just what I needed today.' No shouting, no caps. Icy tone.",
+    },
+    {
+        "id": "E",
+        "name": "Confused Newbie",
+        "pct": 0.10,
+        "desc": "Non-technical user. Doesn't understand terminology. Repeats themselves. Asks same question multiple times. Mild frustration from confusion, not anger.",
+    },
+    {
+        "id": "F",
+        "name": "Legal Threatener",
+        "pct": 0.10,
+        "desc": "Threatens legal action, consumer court, police complaint. Cites regulations. Demands escalation. Formal in tone but threatening in content. 'I will file a complaint with the ombudsman.'",
+    },
 ]
 
-MESSAGE_COUNTS = {
-    "short": (1, 2, 0.15),
-    "medium": (3, 5, 0.40),
-    "long": (6, 10, 0.30),
-    "epic": (11, 20, 0.15),
-}
+FRUSTRATION_BASELINES = [
+    ("mild", 0.20, "Slightly annoyed. User has a minor issue but isn't angry yet. They expect a quick fix."),
+    ("medium", 0.30, "Clearly frustrated. Issue has persisted. User is raising their voice but not raging."),
+    ("high", 0.30, "Very frustrated. Issue has gone unresolved. User is angry, raising voice, threatening."),
+    ("rage", 0.20, "Extremely angry. User has been wronged repeatedly. Screaming, cursing, threatening legal action."),
+]
+
+SECTOR_REVIEWS_CACHE: dict[str, list[dict]] = {}
 
 
-def _load_language_bank(company_name: str) -> dict | None:
-    base = company_name.lower().replace(" ", "-")
-    candidates = [
-        f"{base}_language_bank.json",
-        f"{company_name.lower()}_language_bank.json",
-        f"{base.split('-')[0]}_language_bank.json",
-    ]
-    for d in [DATA_DIR, OUTPUT_DIR]:
-        for pattern in candidates:
-            path = d / pattern
-            if path.exists():
-                with open(path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-    print(f"  [!] No language bank found for {company_name}")
-    return None
+def _load_sector_reviews(sector_name: str) -> list[dict]:
+    if sector_name in SECTOR_REVIEWS_CACHE:
+        return SECTOR_REVIEWS_CACHE[sector_name]
+
+    path = DATA_DIR / "sectors" / sector_name / "raw_reviews.json"
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        reviews = data.get("reviews", [])
+        SECTOR_REVIEWS_CACHE[sector_name] = reviews
+        return reviews
+    return []
 
 
-def _pick_emotional_mode() -> tuple[str, str]:
-    mode = random.choices(
-        [m for m, _ in EMOTIONAL_MODES],
-        weights=[p for _, p in EMOTIONAL_MODES],
-        k=1,
-    )[0]
-    label_map = {
-        "rage": "USER IS FURIOUS. Use ALL CAPS, expletives, threats. No politeness.",
-        "panic": "USER IS PANICKING. Financial loss or urgent problem. Repeated messages, desperation.",
-        "sarcastic": "USER IS SARCASTIC. Passive-aggressive, mocking, 'great service' style.",
-        "confused": "USER IS CONFUSED. They don't understand what happened. Asking repetitive questions.",
-        "resigned": "USER IS RESIGNED. They've tried everything. Tired, giving up, or defeated tone.",
-        "abusive": "USER IS ABUSIVE. Personal insults, vulgar language, yelling.",
-        "threatening_legal": "USER IS THREATENING LEGAL ACTION. Mentioning lawyers, consumer court, police complaint.",
-    }
-    return mode, label_map[mode]
+def _pick_user_class() -> dict:
+    classes = [c for c in USER_CLASSES]
+    weights = [c["pct"] for c in classes]
+    return random.choices(classes, weights=weights, k=1)[0]
 
 
-def _pick_message_count() -> int:
-    size, (min_c, max_c, _) = random.choices(
-        list(MESSAGE_COUNTS.items()),
-        weights=[p for _, (_, _, p) in MESSAGE_COUNTS.items()],
-        k=1,
-    )[0]
-    return random.randint(min_c, max_c)
+def _pick_frustration() -> tuple:
+    levels = [(n, p, d) for n, p, d in FRUSTRATION_BASELINES]
+    weights = [p for _, p, _ in FRUSTRATION_BASELINES]
+    return random.choices(levels, weights=weights, k=1)[0]
 
 
-def _apply_messiness(text: str, intensity: float = 0.3) -> str:
-    if random.random() > intensity:
-        return text
-
-    ops = []
-
-    # Random ALL CAPS for emphasis
-    if random.random() < 0.4:
-        words = text.split()
-        if len(words) > 3:
-            idx = random.randint(0, len(words) - 1)
-            words[idx] = words[idx].upper()
-            text = " ".join(words)
-
-    # Random full-line ALL CAPS (rage mode)
-    if random.random() < 0.15:
-        if random.random() < 0.5:
-            text = text.upper()
-
-    # Random exclamation spam
-    if random.random() < 0.3:
-        text = re.sub(r"[.!?]", "!", text)
-        text = text.rstrip("!") + "!" * random.randint(1, 5)
-
-    # Random typos (swap adjacent chars)
-    if random.random() < 0.25:
-        chars = list(text)
-        for _ in range(random.randint(1, 3)):
-            idx = random.randint(0, len(chars) - 2)
-            if chars[idx].isalpha() and chars[idx + 1].isalpha():
-                chars[idx], chars[idx + 1] = chars[idx + 1], chars[idx]
-        text = "".join(chars)
-
-    # Remove random punctuation
-    if random.random() < 0.15:
-        text = re.sub(r"[.?!,;:]", "", text)
-
-    # Add random ellipsis
-    if random.random() < 0.2:
-        text += "..." if random.random() < 0.5 else ".."
-
-    return text
-
-
-def _inject_hinglish(text: str, hinglish_phrases: list[str]) -> str:
-    if not hinglish_phrases or random.random() > 0.3:
-        return text
-    phrase = random.choice(hinglish_phrases)
-    insert_positions = [
-        lambda t: f"{phrase} {t}",
-        lambda t: f"{t} {phrase}",
-        lambda t: t.replace(".", f", {phrase}.", 1) if "." in t else f"{t} {phrase}",
-    ]
-    return random.choice(insert_positions)(text)
+def _get_domain_reviews(profile: CompanyProfile, count: int = 5) -> list[str]:
+    try:
+        from build_sector_banks import get_sector_for_business_type, load_sector_bank
+        sector = get_sector_for_business_type(profile.business_type)
+        if not sector:
+            return []
+        reviews = _load_sector_reviews(sector)
+        if not reviews:
+            return []
+        selected = random.sample(reviews, min(count, len(reviews)))
+        return [r["text"] for r in selected if r.get("text") and len(r["text"]) > 30]
+    except ImportError:
+        return []
+    except Exception:
+        return []
 
 
 def generate_conversations(
     profile: CompanyProfile,
-    count: int = 60,
+    count: int = 15,
 ) -> list[dict]:
-    bank = _load_language_bank(profile.company_name)
-
     pairs = []
     for persona in profile.personas:
         for intent in profile.intents:
             pairs.append({"persona": persona, "intent": intent})
+
+    # Load real reviews for anchoring
+    anchor_reviews = _get_domain_reviews(profile, count=10)
 
     all_convos = []
     round_num = 0
@@ -163,14 +138,12 @@ def generate_conversations(
     while len(all_convos) < count:
         random.shuffle(pairs)
         for p in pairs:
-            convos = _generate_batch(
-                profile, bank, p["persona"], p["intent"], round_num,
-            )
+            convos = _generate_batch(profile, p["persona"], p["intent"], anchor_reviews, round_num)
             all_convos.extend(convos)
             if len(all_convos) >= count:
                 break
         round_num += 1
-        if round_num > 50:
+        if round_num > 30:
             break
 
     all_convos = all_convos[:count]
@@ -189,107 +162,74 @@ def generate_conversations(
 
 def _generate_batch(
     profile: CompanyProfile,
-    bank: dict | None,
     persona,
     intent,
+    anchor_reviews: list[str],
     round_num: int,
 ) -> list[Conversation]:
-    emotion_mode, emotion_instruction = _pick_emotional_mode()
-    num_messages = _pick_message_count()
+    user_class = _pick_user_class()
+    frust_level, frust_pct, frust_desc = _pick_frustration()
 
-    bank_context = ""
-    if bank:
-        anger = bank.get("anger_words", [])
-        panic = bank.get("panic_words", [])
-        hinglish = bank.get("hinglish_examples", [])
-        starters = bank.get("sentence_starters", {})
-        complaints = bank.get("real_complaints_cleaned", [])
-        issues = bank.get("domain_issues", [])
-        financial = bank.get("financial_terms", [])
-        sarcasm = bank.get("sarcasm_patterns", [])
-
-        if starters:
-            angry_starts = starters.get("angry", [])
-            panicked_starts = starters.get("panicked", [])
-            sarcastic_starts = starters.get("sarcastic", [])
-        else:
-            angry_starts = panicked_starts = sarcastic_starts = []
-
-        bank_context = f"""
-Real vocabulary to use (must include some of these):
-Anger words: {random.sample(anger, min(3, len(anger))) if anger else 'use natural anger'}
-Panic words: {random.sample(panic, min(2, len(panic))) if panic else 'use natural panic'}
-Financial terms: {random.sample(financial, min(3, len(financial))) if financial else 'use natural terms'}
-
-Real sentence starters to use:
-Angry: {random.sample(angry_starts, min(2, len(angry_starts))) if angry_starts else 'natural angry starters'}
-Panicked: {random.sample(panicked_starts, min(2, len(panicked_starts))) if panicked_starts else 'natural panicked starters'}
-Sarcastic: {random.sample(sarcastic_starts, min(2, len(sarcastic_starts))) if sarcastic_starts else 'natural sarcastic starters'}
-
-Real complaint example to style-match:
-{random.choice(complaints) if complaints else 'user complaint'}
-
-Domain issues to reference: {random.sample(issues, min(3, len(issues))) if issues else profile.high_frustration_areas[:3]}
-
-Hinglish phrases to mix in (use naturally): {random.sample(hinglish, min(2, len(hinglish))) if hinglish else 'none'}
-
-Sarcasm patterns: {random.sample(sarcasm, min(2, len(sarcasm))) if sarcasm else 'none'}
-"""
+    # Pick a real review anchor
+    anchor = ""
+    if anchor_reviews:
+        anchor = random.choice(anchor_reviews)
 
     domain_terms = profile.domain_terminology[:5] if profile.domain_terminology else []
-    known_issues = profile.known_issues_from_docs[:5] if profile.known_issues_from_docs else []
-    error_scenarios = profile.error_scenarios[:5] if profile.error_scenarios else []
-    agent_failures = profile.agent_failure_patterns[:5] if profile.agent_failure_patterns else []
+    known_issues = profile.known_issues_from_docs[:4] if profile.known_issues_from_docs else []
+    error_scenarios = profile.error_scenarios[:4] if profile.error_scenarios else []
+    agent_failures = profile.agent_failure_patterns[:3] if profile.agent_failure_patterns else []
 
-    prompt = f"""Generate 3 HIGHLY REALISTIC customer support conversations for {profile.company_name}.
+    prompt = f"""Generate 3 customer support conversations for {profile.company_name}.
 
-{emotion_instruction}
+COMPANY: {profile.company_name} ({profile.business_type})
+DOMAIN TERMS: {', '.join(domain_terms)}
+KNOWN ISSUES: {', '.join(known_issues)}
+ERROR SCENARIOS: {', '.join(error_scenarios)}
+AGENT FAILURES: {', '.join(agent_failures)}
 
-Company: {profile.company_name} ({profile.business_type})
-Voice guidelines (how agent SHOULD NOT sound): {profile.voice_guidelines}
+PERSONA: {persona.name} ({persona.description})
+INTENT: {intent.name}
+FRUSTRATION LEVEL: {frust_level.upper()} — {frust_desc}
 
-Persona: {persona.name} ({persona.description})
-Traits: {', '.join(persona.traits)}
-Frustration triggers: {', '.join(persona.frustration_triggers)}
+USER CLASS: {user_class['name']}
+{user_class['desc']}
 
-Intent: {intent.name}
-User steps: {', '.join(intent.user_steps)}
-Failure modes: {', '.join(intent.failure_modes)}
+ANCHOR REAL REVIEW (use this as inspiration for the conversation's tone and content):
+"{anchor}"
 
-Domain terms to use naturally: {', '.join(domain_terms)}
-Real issues from this company: {', '.join(known_issues)}
-Error scenarios: {', '.join(error_scenarios)}
-Ways agent can fail: {', '.join(agent_failures)}
+INSTRUCTIONS:
+- EACH conversation MUST be spoken entirely in ONE user class. Do NOT mix classes.
+- If user class is "Professional English" → NO Hinglish, NO slang, proper grammar.
+- If user class is "Hinglish Coder" → weave Hindi naturally into English sentences mid-flow.
+- If user class is "ALL CAPS Rager" → EVERY message is angry, short, aggressive.
+- If user class is "Passive Aggressive" → sarcastic, cold, polite words with angry subtext.
+- If user class is "Confused Newbie" → no technical jargon, repeat questions, mild frustration.
+- If user class is "Legal Threatener" → formal tone, mentions regulations, demands escalation.
 
-Each conversation should have between 3 and 12 user messages. Vary the lengths across conversations.
-
-{bank_context}
-
-CRITICAL RULES:
-- Do NOT use polite language. Real frustrated users are NOT polite.
-- Do NOT say "I'm having trouble" or "Can you help" — real users don't talk like this.
-- Start conversations with raw emotion, not explanations.
-- Include specific numbers (amounts, dates, order IDs) naturally.
-- Vary message length — some are 2 words, some are 3 sentences.
-- Add typos, missing punctuation, or awkward phrasing naturally.
-- NEVER mention "your competitor" in a structured way. Just say the competitor name directly if at all.
-- The agent can be unhelpful, slow, or wrong. Sometimes the agent gaslights the user.
-- Sometimes the issue is NOT resolved.
-- Include financial specifics where relevant (actual amounts with ₹, fund names, order types).
-- For Hinglish: mix Hindi words naturally into English sentences.
+- Frustration level {frust_level}: adjust intensity accordingly.
+- DO NOT use "can you", "could you", "I'm having trouble", "can you help" — EVER.
+- Real users describe the problem, they don't ask for help.
+- Include specific numbers, dates, amounts naturally.
+- Vary message lengths: some short (2-5 words), some longer.
+- The agent can be unhelpful, wrong, slow, or gaslight the user.
+- Sometimes the issue is NOT resolved. Sometimes the user gives up.
+- AVOID checklist patterns. Do NOT include every keyword.
+- Real people repeat themselves, use filler words, sometimes trail off...
+- Start with the problem, not with pleasantries.
 
 Return ONLY valid JSON matching this schema:
 {{
   "conversations": [
     {{
       "id": "unique-id",
-      "persona": "persona name",
-      "intent": "intent name",
-      "scenario": "one line description",
+      "persona": "{persona.name}",
+      "intent": "{intent.name}",
+      "scenario": "one-line description",
       "user_messages": ["msg1", "msg2", ...],
       "frustration_signals": ["signal1", "signal2"],
-      "frustration_level": "low|medium|high",
-      "expected_good_outcome": "short description of fix"
+      "frustration_level": "{frust_level}",
+      "expected_good_outcome": "what a fix looks like"
     }}
   ]
 }}"""
@@ -298,18 +238,10 @@ Return ONLY valid JSON matching this schema:
         batch = call_llm(prompt, ConversationBatch)
         result = []
         for c in batch.conversations:
-            c.id = f"{profile.company_name.lower().replace(' ', '-')}-{abs(hash(c.scenario)) % 10000:04d}"
-
-            # Apply messiness post-processing
-            messy_messages = []
-            for i, msg in enumerate(c.user_messages):
-                m = msg
-                if bank:
-                    m = _inject_hinglish(m, bank.get("hinglish_examples", []))
-                m = _apply_messiness(m, intensity=0.35)
-                messy_messages.append(m)
-            c.user_messages = messy_messages
-
+            c.id = f"{profile.company_name.lower().replace(' ', '-')}-{uuid.uuid4().hex[:6]}"
+            c.frustration_level = frust_level
+            c.persona = persona.name
+            c.intent = intent.name
             result.append(c)
         return result
     except Exception as e:

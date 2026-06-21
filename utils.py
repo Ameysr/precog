@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from config import GROQ_API_KEY, GROQ_MODEL
 
 _last_call = 0.0
-_MIN_INTERVAL = 0.3  # seconds between API calls to avoid rate limits
+_MIN_INTERVAL = 1.0  # seconds between API calls to avoid per-minute rate limits
 
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -40,10 +40,11 @@ def call_llm(prompt: str, response_model: type[BaseModel]) -> BaseModel:
     return response_model.model_validate_json(raw)
 
 
-def save_json(data, filename: str | None = None) -> Path:
+def save_json(data, filename: str | None = None, directory: Path | None = None) -> Path:
     if filename is None:
         filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_conversations.json"
-    path = OUTPUT_DIR / filename
+    path = (directory or OUTPUT_DIR) / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"Saved {path}")

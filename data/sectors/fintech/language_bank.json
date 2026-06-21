@@ -1,0 +1,247 @@
+{
+  "sector": "fintech",
+  "source_companies": [
+    "Groww",
+    "Paytm",
+    "PhonePe"
+  ],
+  "total_reviews": 600,
+  "vocabulary": {
+    "anger_words": [
+      "disappointed",
+      "frustrating",
+      "terrible",
+      "worst",
+      "unacceptable",
+      "disgusting",
+      "hate",
+      "avoid",
+      "not recommended",
+      "bad"
+    ],
+    "panic_words": [
+      "lost",
+      "money",
+      "stuck",
+      "delayed",
+      "inaccurate",
+      "unreliable",
+      "lagged",
+      "crashed",
+      "frozen",
+      "stuck"
+    ],
+    "sarcasm_phrases": [
+      "very easy to use",
+      "great work",
+      "excellent choice",
+      "best platform",
+      "no issues at all",
+      "smooth experience",
+      "perfect app",
+      "no problems found",
+      "great customer service",
+      "no complaints"
+    ],
+    "hinglish_phrases": [
+      "bas app",
+      "be careful",
+      "non supportive",
+      "maximum time number not connecting",
+      "call cut down in between conversation",
+      "app frequently crashes",
+      "today it crashed",
+      "throwback errors",
+      "due to which I got into negative money",
+      "market closed"
+    ]
+  },
+  "sentence_starters": {
+    "angry": [
+      "I am extremely",
+      "I am so",
+      "I am fed up",
+      "I am really",
+      "I am totally",
+      "I am not happy",
+      "I am very",
+      "I am extremely",
+      "I am so",
+      "I am disappointed"
+    ],
+    "panicked": [
+      "Oh no",
+      "What happened",
+      "This is crazy",
+      "I am shocked",
+      "I am surprised",
+      "I am worried",
+      "I am concerned",
+      "I am stressed",
+      "I am anxious",
+      "I am freaking out"
+    ],
+    "confused": [
+      "I don't understand",
+      "I am not sure",
+      "I am confused",
+      "I am not clear",
+      "I am unsure",
+      "I am puzzled",
+      "I am baffled",
+      "I am perplexed",
+      "I am stumped",
+      "I am lost"
+    ],
+    "sarcastic": [
+      "Wow",
+      "Great",
+      "Excellent",
+      "Perfect",
+      "Just what I needed",
+      "Thanks for the help",
+      "I'm so glad",
+      "This is exactly what I wanted",
+      "I'm thrilled",
+      "I'm so happy"
+    ]
+  },
+  "hinglish_examples": [
+    "bas app be careful",
+    "non supportive customer care",
+    "maximum time number not connecting",
+    "call cut down in between conversation",
+    "app frequently crashes",
+    "today it crashed",
+    "throwback errors",
+    "due to which I got into negative money",
+    "market closed",
+    "I lost 4k because of App"
+  ],
+  "emotional_patterns": [
+    {
+      "emotion": "anger",
+      "example_text": "I am extremely disappointed with the app's performance."
+    },
+    {
+      "emotion": "panic",
+      "example_text": "Oh no, I lost 4k because of App."
+    },
+    {
+      "emotion": "confusion",
+      "example_text": "I don't understand why the app is not working properly."
+    },
+    {
+      "emotion": "sarcasm",
+      "example_text": "Wow, this app is perfect."
+    },
+    {
+      "emotion": "anger",
+      "example_text": "I am so frustrated with the app's customer service."
+    },
+    {
+      "emotion": "panic",
+      "example_text": "I am worried about my money being stuck in the app."
+    },
+    {
+      "emotion": "confusion",
+      "example_text": "I am not sure why the app is crashing all the time."
+    },
+    {
+      "emotion": "sarcasm",
+      "example_text": "Great, just what I needed, another app to crash."
+    },
+    {
+      "emotion": "anger",
+      "example_text": "I am extremely disappointed with the app's performance."
+    },
+    {
+      "emotion": "panic",
+      "example_text": "Oh no, I lost my money because of the app."
+    }
+  ],
+  "real_complaints_cleaned": [
+    "The app is not reliable for regular traders.",
+    "The app lags in peak time and causes huge losses.",
+    "The app frequently crashes and throws back errors.",
+    "The app's customer service is non-supportive.",
+    "The app's customer care is maximum time number not connecting.",
+    "The app's call cuts down in between conversation.",
+    "The app's performance is unacceptable.",
+    "The app's fees are unpredictable.",
+    "The app's data is often inaccurate.",
+    "The app's customer service is disappointing."
+  ],
+  "domain_issues": [
+    "Unreliable app performance",
+    "Lagging in peak time",
+    "Frequent crashes",
+    "Non-supportive customer service",
+    "Maximum time number not connecting",
+    "Call cuts down in between conversation",
+    "Unpredictable fees",
+    "Inaccurate data",
+    "Disappointing customer service",
+    "Unreliable app"
+  ],
+  "financial_terms": [
+    "Investment",
+    "Trading",
+    "Mutual funds",
+    "Stocks",
+    "ETFs",
+    "SIP",
+    "Brokerage",
+    "Fees",
+    "Taxes",
+    "Returns"
+  ],
+  "anger_words": [
+    "disappointed",
+    "frustrating",
+    "terrible",
+    "worst",
+    "unacceptable",
+    "disgusting",
+    "hate",
+    "avoid",
+    "not recommended",
+    "bad"
+  ],
+  "panic_words": [
+    "lost",
+    "money",
+    "stuck",
+    "delayed",
+    "inaccurate",
+    "unreliable",
+    "lagged",
+    "crashed",
+    "frozen",
+    "stuck"
+  ],
+  "sarcasm_patterns": [
+    "very easy to use",
+    "great work",
+    "excellent choice",
+    "best platform",
+    "no issues at all",
+    "smooth experience",
+    "perfect app",
+    "no problems found",
+    "great customer service",
+    "no complaints"
+  ],
+  "typos_common": [
+    "bas app",
+    "be careful",
+    "non supportive",
+    "maximum time number not connecting",
+    "call cut down in between conversation",
+    "app frequently crashes",
+    "today it crashed",
+    "throwback errors",
+    "due to which I got into negative money",
+    "market closed"
+  ]
+}

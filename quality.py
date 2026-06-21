@@ -107,7 +107,12 @@ def check_politeness(conversations: list[dict]) -> dict:
 
 
 def check_financial_specifics(conversations: list[dict], domain_type: str = "") -> dict:
-    patterns = [r"₹\d+", r"rs\s*\d+", r"\d+\s*(lakh|crore|k|thousand)", r"(order|ref|txn|id)\s*[#:]\s*\w+"]
+    patterns = [
+        r"₹\d+", r"rs\s*\d+", r"\d+\s*(lakh|crore|k|thousand)",
+        r"(order|ref|txn|policy|claim)\s*[#:]\s*\w+",
+        r"\d{4,}",  # long numbers (policy/claim IDs)
+        r"(premium|deductible|coverage|copay|payout)\s*[:]\s*\d+",
+    ]
     found = 0
     for c in conversations:
         for msg in c.get("user_messages", []):

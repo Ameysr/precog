@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from config import REQUEST_TIMEOUT
 from utils import call_llm, save_json
+from sectors import get_sector_for_business_type, load_sector_bank, sector_bank_exists as _
 
 warnings.filterwarnings("ignore", message=".*renamed to.*")
 
@@ -246,6 +247,20 @@ def build_language_bank(
         for r in raw_reviews[:200]
     )
 
+    schema_example = json.dumps({
+        "vocabulary": {"anger_words": ["word1"], "panic_words": ["word1"], "sarcasm_phrases": ["phrase1"], "hinglish_phrases": ["phrase1"]},
+        "sentence_starters": {"angry": ["starter1"], "panicked": ["starter1"], "confused": ["starter1"], "sarcastic": ["starter1"]},
+        "hinglish_examples": ["phrase1"],
+        "emotional_patterns": [{"emotion": "anger", "example_text": "text"}],
+        "real_complaints_cleaned": ["complaint1"],
+        "domain_issues": ["issue1"],
+        "financial_terms": ["term1"],
+        "anger_words": ["word1"],
+        "panic_words": ["word1"],
+        "sarcasm_patterns": ["pattern1"],
+        "typos_common": ["typo1"],
+    }, indent=2)
+
     prompt = f"""You are analyzing real user reviews for {company_name}.
 
 Here are {len(raw_reviews)} real reviews from Google Play, Trustpilot, and Reddit:
@@ -255,20 +270,10 @@ Here are {len(raw_reviews)} real reviews from Google Play, Trustpilot, and Reddi
 Extract a structured language bank to help generate realistic synthetic user conversations.
 Focus on capturing the MESSY, REAL patterns — not sanitized versions.
 
-Extract:
-1. vocabulary: dict with keys "anger_words", "panic_words", "sarcasm_phrases", "hinglish_phrases", each as list of examples
-2. sentence_starters: dict with keys "angry", "panicked", "confused", "sarcastic", each as list of real sentence starters
-3. hinglish_examples: list of real Hinglish phrases found (exact matches)
-4. emotional_patterns: list of dicts with "emotion" and "example_text"
-5. real_complaints_cleaned: list of 20 most representative complaint texts (cleaned but keep emotional language)
-6. domain_issues: list of specific issues users repeatedly face
-7. financial_terms: list of financial specific terms found (amounts, order types, error codes)
-8. anger_words: list of actual anger/vulgar words used
-9. panic_words: list of words indicating financial panic
-10. sarcasm_patterns: list of sarcastic phrases used
-11. typos_common: list of common typos/autocorrect fails found
+Return ONLY valid JSON matching this EXACT schema (field names must be identical):
+{schema_example}
 
-Return ONLY valid JSON matching the schema."""
+Fill each list with 5-20 real examples extracted from the reviews above. Do NOT skip any fields."""
 
     return call_llm(prompt, LanguageBank)
 
@@ -335,6 +340,29 @@ def scrape_all(
 ) -> LanguageBank:
     domain = _extract_domain(company_url)
 
+    # Check sector cache FIRST (pre-built, highest quality)
+    if profile:
+        sector_name = get_sector_for_business_type(profile.business_type)
+        if not sector_name:
+            sector_name = get_sector_for_business_type(company_name)
+        if sector_name and load_sector_bank(sector_name):
+            print(f"  [+] Sector detected: {sector_name} — using pre-built bank")
+            bank_data = load_sector_bank(sector_name)
+            valid_keys = set(LanguageBank.model_fields.keys())
+            filtered = {k: v for k, v in bank_data.items() if k in valid_keys}
+            bank = LanguageBank(**filtered)
+            bank_payload = {
+                "company": company_name,
+                "sector": sector_name,
+                "total_reviews": len(filtered.get("real_complaints_cleaned", [])),
+                **filtered,
+            }
+            save_json(
+                bank_payload,
+                filename=f"{company_name.lower().replace(' ', '-')}_language_bank.json",
+            )
+            return bank
+
     if not app_id:
         app_id = _discover_app_id(company_url)
 
@@ -357,7 +385,7 @@ def scrape_all(
     print(f"[reviews] Total raw reviews: {len(all_reviews)}")
 
     if not all_reviews:
-        print("[!] No reviews found from any source. Generating synthetic language bank from industry profile...")
+        print("[!] No reviews found. Generating synthetic language bank from industry profile...")
         bank = _generate_fallback_bank(company_name, profile=profile)
         bank_payload = {
             "company": company_name,
