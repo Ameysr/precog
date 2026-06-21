@@ -1,0 +1,21 @@
+generator.py
+  s_075a1c1cfcebe4::t_f85c07125057d4 29,32-37,42-43
+profiler.py
+  s_075a1c1cfcebe4::t_059aaaf416ae20 1-2,35-63,70-71,81-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "a65297f74202e2b4528206fcd327a074693b4a27",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
