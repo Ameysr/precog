@@ -1,0 +1,19 @@
+profiler.py
+  s_075a1c1cfcebe4::t_c36a6a82b2e668 33-36,65-68,90-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "4e67bac35e61612cf0cd9c61c2913c681d66bb8a",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
