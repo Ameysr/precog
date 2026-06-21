@@ -25,25 +25,22 @@ class ConversationBatch(BaseModel):
 
 def generate_conversations(profile: CompanyProfile, count: int = 60) -> list[dict]:
     pairs = _build_persona_intent_pairs(profile.personas, profile.intents)
-    random.shuffle(pairs)
 
-    happy_count = int(count * 0.4)
-    frust_count = int(count * 0.4)
-    edge_count = count - happy_count - frust_count
+    mood_cycle = ["happy", "happy", "frustrated", "frustrated", "edge"]
 
     all_convos = []
-
-    for pair_list, mood_label, mood in [
-        (pairs[:happy_count], "happy", "smooth"),
-        (pairs[happy_count:happy_count + frust_count], "frustrated", "frustrated"),
-        (pairs[happy_count + frust_count:], "edge_cases", "edge"),
-    ]:
-        for p in pair_list[:3]:
+    round_num = 0
+    while len(all_convos) < count:
+        random.shuffle(pairs)
+        for p in pairs:
+            mood = mood_cycle[(round_num + hash(p["persona"].name + p["intent"].name)) % len(mood_cycle)]
+            mood_label = {"happy": "smooth", "frustrated": "frustrated", "edge": "edge"}[mood]
             convos = _generate_batch(profile, p["persona"], p["intent"], mood, mood_label)
             all_convos.extend(convos)
             if len(all_convos) >= count:
                 break
-        if len(all_convos) >= count:
+        round_num += 1
+        if round_num > 100:
             break
 
     all_convos = all_convos[:count]
