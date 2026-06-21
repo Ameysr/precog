@@ -1,4 +1,8 @@
 import os
+import warnings
+
+warnings.filterwarnings("ignore", category=Warning, module="requests")
+
 from dotenv import load_dotenv
 
 load_dotenv()

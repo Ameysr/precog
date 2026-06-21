@@ -1,6 +1,5 @@
-crawl4ai
+requests
+beautifulsoup4
 pydantic
 openai
 python-dotenv
-playwright
-requests

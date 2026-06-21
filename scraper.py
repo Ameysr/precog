@@ -2,7 +2,7 @@ import re
 from urllib.parse import urljoin, urlparse
 
 import requests
-from crawl4ai import WebCrawler
+from bs4 import BeautifulSoup
 
 from config import MAX_PAGES, REQUEST_TIMEOUT
 
@@ -46,18 +46,26 @@ def _is_same_domain(base: str, url: str) -> bool:
     return urlparse(url).netloc == "" or urlparse(base).netloc in url
 
 
+def _html_to_markdown(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
+        tag.decompose()
+    text = soup.get_text(separator="\n", strip=True)
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    return "\n".join(lines[:500])
+
+
 def discover_urls(base_url: str) -> list[str]:
     if not base_url.startswith("http"):
         base_url = "https://" + base_url
     try:
-        resp = requests.get(base_url, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(base_url, timeout=REQUEST_TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
     except Exception as e:
         print(f"Failed to fetch {base_url}: {e}")
         return [base_url]
 
     links = set()
-    base_domain = urlparse(base_url).netloc
     for match in re.finditer(r'href=["\']([^"\']+)["\']', resp.text):
         raw = match.group(1)
         full = urljoin(base_url, raw)
@@ -77,19 +85,27 @@ def discover_urls(base_url: str) -> list[str]:
     return list(dict.fromkeys(all_urls))
 
 
+def _get_title(html: str, fallback: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    tag = soup.title
+    return tag.string.strip() if tag and tag.string else fallback
+
+
 def scrape_pages(urls: list[str]) -> dict[str, str]:
-    crawler = WebCrawler(verbose=False)
     results = {}
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
     for url in urls:
         try:
-            result = crawler.run(url)
-            text = result.markdown or ""
-            title = result.metadata.get("title", url) if result.metadata else url
+            resp = session.get(url, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            text = _html_to_markdown(resp.text)
+            title = _get_title(resp.text, url)
             if len(text) > 100:
                 results[title] = text
-                print(f"  ✓ {title[:60]}")
+                print(f"  [+] {title[:60]}")
             else:
-                print(f"  - {title[:60]} (too short, skipped)")
+                print(f"  [-] {title[:60]} (too short, skipped)")
         except Exception as e:
-            print(f"  ✗ {url[:60]}: {e}")
+            print(f"  [x] {url[:60]}: {e}")
     return results
