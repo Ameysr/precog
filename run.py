@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 from scraper import discover_urls, scrape_pages
 from profiler import build_profile
 from generator import generate_conversations

@@ -7,7 +7,7 @@ Generate realistic, frustration-embedded synthetic conversations for ANY company
 ```bash
 pip install -r requirements.txt
 playwright install
-cp .env.example .env  # add your OPENAI_API_KEY
+cp .env.example .env  # add your GROQ_API_KEY
 python run.py
 ```
 

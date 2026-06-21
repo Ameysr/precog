@@ -1,14 +1,11 @@
 import random
 from datetime import datetime
 
-from openai import OpenAI
 from pydantic import BaseModel
 
-from config import OPENAI_API_KEY
+from config import GROQ_MODEL
 from profiler import CompanyProfile, Persona, Intent
-from utils import save_json
-
-client = OpenAI(api_key=OPENAI_API_KEY)
+from utils import call_llm, save_json
 
 
 class Conversation(BaseModel):
@@ -105,20 +102,27 @@ Generate 3 conversations. Each must:
 - Be based on the intent's failure modes
 - Include what a good support response should do
 
-Return ONLY valid JSON matching the schema."""
+Return ONLY valid JSON matching this schema:
+{{
+  "conversations": [
+    {{
+      "id": "unique-id",
+      "persona": "persona name",
+      "intent": "intent name",
+      "scenario": "description of the scenario",
+      "user_messages": ["msg1", "msg2", "msg3"],
+      "frustration_signals": ["signal1", "signal2"],
+      "frustration_level": "low|medium|high",
+      "expected_good_outcome": "what good agent should do"
+    }}
+  ]
+}}"""
 
     try:
-        response = client.beta.chat.completions.parse(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            response_format=ConversationBatch,
-        )
-        batch = response.choices[0].message.parsed
-        idx = 0
+        batch = call_llm(prompt, ConversationBatch)
         for c in batch.conversations:
             c.id = f"{profile.company_name.lower().replace(' ', '-')}-{hash(c.scenario) % 10000:04d}"
-            idx += 1
         return batch.conversations
     except Exception as e:
-        print(f"  Generation failed for {persona.name}/{intent.name}: {e}")
+        print(f"  Failed for {persona.name}/{intent.name}: {e}")
         return []

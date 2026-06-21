@@ -1,26 +1,33 @@
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 
-from openai import OpenAI
+from groq import Groq
 from pydantic import BaseModel
 
-from config import OPENAI_API_KEY
+from config import GROQ_API_KEY, GROQ_MODEL
 
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+
+def _client() -> Groq:
+    return Groq(api_key=GROQ_API_KEY)
 
 
 def call_llm(prompt: str, response_model: type[BaseModel]) -> BaseModel:
-    response = client.beta.chat.completions.parse(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        response_format=response_model,
+    messages = [
+        {"role": "system", "content": "You are a JSON generator. Output only valid JSON matching the requested schema."},
+        {"role": "user", "content": prompt},
+    ]
+    response = _client().chat.completions.create(
+        model=GROQ_MODEL,
+        messages=messages,
+        response_format={"type": "json_object"},
+        temperature=0.3,
     )
-    return response.choices[0].message.parsed
+    raw = response.choices[0].message.content
+    return response_model.model_validate_json(raw)
 
 
 def save_json(data, filename: str | None = None) -> Path:
@@ -31,11 +38,6 @@ def save_json(data, filename: str | None = None) -> Path:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"Saved {path}")
     return path
-
-
-def load_json(path: str | Path) -> dict:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def to_slug(text: str) -> str:

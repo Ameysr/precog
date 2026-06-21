@@ -1,5 +1,5 @@
+groq
 requests
 beautifulsoup4
 pydantic
-openai
 python-dotenv
