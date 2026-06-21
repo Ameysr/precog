@@ -34,3 +34,12 @@ def load_sector_bank(sector_name: str) -> dict | None:
 
 def sector_bank_exists(sector_name: str) -> bool:
     return (SECTORS_DIR / sector_name / "language_bank.json").exists()
+
+
+def load_sector_raw_reviews(sector_name: str) -> list[dict]:
+    path = SECTORS_DIR / sector_name / "raw_reviews.json"
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("reviews", [])
+    return []
