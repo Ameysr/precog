@@ -4,3 +4,4 @@ beautifulsoup4
 pydantic
 python-dotenv
 google-play-scraper
+duckduckgo_search

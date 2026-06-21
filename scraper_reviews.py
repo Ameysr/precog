@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import warnings
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -11,6 +12,8 @@ from pydantic import BaseModel
 
 from config import REQUEST_TIMEOUT
 from utils import call_llm, save_json
+
+warnings.filterwarnings("ignore", message=".*renamed to.*")
 
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
@@ -135,6 +138,50 @@ def scrape_trustpilot(domain: str, count: int = 50) -> list[dict]:
     return results[:count]
 
 
+def scrape_web_search(company_name: str, full_name: str = "", count: int = 30) -> list[dict]:
+    results = []
+    seen = set()
+    name = full_name or company_name
+    queries = [
+        f"{name} review complaint",
+        f"{name} customer support issue",
+        f"{name} problem",
+        f"{name} bad experience",
+        f'{company_name} "worst" review',
+    ]
+    try:
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            from duckduckgo_search import DDGS
+        for query in queries:
+            try:
+                with DDGS() as ddgs:
+                    for r in ddgs.text(query, max_results=10):
+                        snippet = r.get("body", "") or r.get("snippet", "")
+                        title = r.get("title", "")
+                        text = f"{title}: {snippet}"
+                        if text and text not in seen and len(text) > 30:
+                            seen.add(text)
+                            results.append({
+                                "source": "web_search",
+                                "text": text[:500],
+                                "rating": 0,
+                            })
+                if len(results) >= count:
+                    break
+            except Exception:
+                pass
+    except ImportError:
+        print("  [!] duckduckgo_search not installed, skipping web search")
+        return []
+    if results:
+        print(f"  [+] Web search: {len(results)} reviews")
+    else:
+        print(f"  [-] Web search: no results found")
+    return results[:count]
+
+
 def scrape_reddit(company_name: str, count: int = 50) -> list[dict]:
     results = []
     seen = set()
@@ -226,7 +273,21 @@ Return ONLY valid JSON matching the schema."""
     return call_llm(prompt, LanguageBank)
 
 
-def _generate_fallback_bank(company_name: str) -> LanguageBank:
+def _generate_fallback_bank(company_name: str, profile=None) -> LanguageBank:
+    from profiler import CompanyProfile
+
+    domain_hint = f" ({profile.business_type})" if profile else ""
+    personas_text = ""
+    intents_text = ""
+    issues_text = ""
+    terms_text = ""
+
+    if profile:
+        personas_text = "\n".join(f"  - {p.name}: {p.description}" for p in profile.personas)
+        intents_text = "\n".join(f"  - {i.name}: {i.description}" for i in profile.intents)
+        issues_text = "\n".join(f"  - {a}" for a in (profile.high_frustration_areas + profile.known_issues_from_docs + profile.error_scenarios)[:8])
+        terms_text = ", ".join(profile.domain_terminology[:8]) if profile.domain_terminology else ""
+
     schema = json.dumps({
         "vocabulary": {"anger_words": ["word1", "word2"], "panic_words": ["word1"], "sarcasm_phrases": ["phrase1"], "hinglish_phrases": ["phrase1"]},
         "sentence_starters": {"angry": ["starter1"], "panicked": ["starter1"], "confused": ["starter1"], "sarcastic": ["starter1"]},
@@ -241,14 +302,27 @@ def _generate_fallback_bank(company_name: str) -> LanguageBank:
         "typos_common": ["typo1", "typo2"],
     }, indent=2)
 
-    prompt = f"""Generate a language bank for {company_name}, a company in the insurance/fintech space.
-Since no real user reviews were available, create a realistic language bank based on industry knowledge.
+    prompt = f"""Generate a language bank for {company_name}{domain_hint}.
+
+This company serves these customer types:
+{personas_text}
+
+Customers commonly need help with:
+{intents_text}
+
+Known issues / frustration areas from the company's own help center:
+{issues_text}
+
+Domain-specific terminology: {terms_text}
+
+Since no real user reviews were available, create a realistic language bank based on the above company profile.
+Generate complaints that match their actual business — use their specific terminology, reference their known issues, and match their customer types.
 
 Return ONLY valid JSON matching this EXACT schema (field names must be identical):
 {schema}
 
-Make it feel REAL — not polite, not sanitized. Model it after real insurance complaints on Trustpilot/Reddit.
-Fill each list with 5-20 real examples. Do NOT skip any fields."""
+Make it feel REAL — not polite, not sanitized. Model it after real complaints on Trustpilot/Reddit.
+Fill each list with 5-15 real examples. Do NOT skip any fields."""
 
     return call_llm(prompt, LanguageBank)
 
@@ -257,6 +331,7 @@ def scrape_all(
     company_name: str,
     company_url: str,
     app_id: str | None = None,
+    profile=None,
 ) -> LanguageBank:
     domain = _extract_domain(company_url)
 
@@ -274,12 +349,16 @@ def scrape_all(
     print("[reviews] Scraping Reddit...")
     reddit_reviews = scrape_reddit(company_name)
 
-    all_reviews = play_reviews + trust_reviews + reddit_reviews
+    full_company_name = getattr(profile, "company_name", company_name) if profile else company_name
+    print("[reviews] Scraping web search...")
+    web_reviews = scrape_web_search(company_name, full_name=full_company_name)
+
+    all_reviews = play_reviews + trust_reviews + reddit_reviews + web_reviews
     print(f"[reviews] Total raw reviews: {len(all_reviews)}")
 
     if not all_reviews:
         print("[!] No reviews found from any source. Generating synthetic language bank from industry profile...")
-        bank = _generate_fallback_bank(company_name)
+        bank = _generate_fallback_bank(company_name, profile=profile)
         bank_payload = {
             "company": company_name,
             "total_reviews": 0,

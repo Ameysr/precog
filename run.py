@@ -47,6 +47,7 @@ def main():
         company_name=company_name,
         company_url=url,
         app_id=app_hint or None,
+        profile=profile,
     )
     if bank:
         print(f"  Language bank built with real user vocabulary")
