@@ -39,12 +39,10 @@ def main():
     sector = get_sector_for_business_type(profile.business_type) or get_sector_for_business_type(company_name)
 
     if sector:
-        taxonomy_intents = get_intents_for_sector(sector, [i.name for i in profile.intents])
+        taxonomy_intents = get_intents_for_sector(sector)
         raw = load_sector_raw_reviews(sector)
-        print(f"  Sector: {sector} ({len(raw)} reviews)")
+        print(f"  Sector: {sector} ({len(raw)} raw reviews)")
         print(f"  Granular intents in taxonomy: {len(taxonomy_intents)}")
-        for t in taxonomy_intents:
-            print(f"    [{t['id']}] {t['name']}")
     else:
         print("  No sector match. Cannot build test suite.")
         return
@@ -74,16 +72,27 @@ def main():
     print(f"{'='*50}")
     print(f"  Company: {profile.company_name}")
     print(f"  Sector: {sector}")
-    print(f"  Reviews classified: {len(classified)}")
-    print(f"  Coverage: {suite['coverage']['granular_intents']['pct']}% granular intents")
-    print(f"  Failure modes tested: {suite['coverage']['failure_modes']['unique_tested']} unique")
-    print(f"  Severity distribution: {suite['coverage']['by_severity']}")
+    c = suite["coverage"]
+    print(f"  Reviews classified: {c['total_test_cases']} ({c['failure_cases']} failures, {c['positive_praise_cases']} positive)")
+    print(f"  Granular intents: {c['granular_intents']['pct']}% covered ({c['granular_intents']['covered']}/{c['granular_intents']['total']})")
+    print(f"  Failure modes tested: {c['failure_modes']['unique_tested']} unique")
+    print(f"  Severity: {c['by_severity']}")
 
     if suite["gaps"]["untested_intents"]:
-        print(f"\n  Gaps: {', '.join(suite['gaps']['untested_intents'])}")
-        print(f"  {suite['gaps']['recommendation']}")
+        print(f"\n  Gaps ({len(suite['gaps']['untested_intents'])}): {', '.join(suite['gaps']['untested_intents'][:5])}...")
     else:
-        print(f"\n  Full intent coverage achieved.")
+        print(f"\n  Full intent coverage.")
+
+    # Show a sample case
+    if suite["test_cases_negative"]:
+        sample = suite["test_cases_negative"][0]
+        print(f"\n  Sample auto-fix case:")
+        print(f"    Intent: {sample['intent_match_id']}")
+        print(f"    Failure: {sample['failure_mode']}")
+        print(f"    Bad response: {sample['current_bad_response'][:80]}...")
+        print(f"    Expected: {sample['expected_agent_behavior'][0][:80]}...")
+        if sample["verification_scenarios"]:
+            print(f"    Verify: {', '.join(sample['verification_scenarios'][:2])}")
 
     print(f"\n  Output: output/{profile.company_name.lower().replace(' ', '-')}_test_suite.json")
     print(f"  Ready for Agnost's auto-fix pipeline.")
