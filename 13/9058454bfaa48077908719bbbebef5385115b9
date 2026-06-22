@@ -1,0 +1,21 @@
+README.md
+  s_075a1c1cfcebe4::t_866259d05d2c5c 1,3
+  s_075a1c1cfcebe4::t_be94cdf62c94dc 13
+  s_075a1c1cfcebe4::t_4358c3184ae4d5 131-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "139058454bfaa48077908719bbbebef5385115b9",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
