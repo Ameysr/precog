@@ -1,0 +1,26 @@
+taxonomy.py
+  s_075a1c1cfcebe4::t_9caf6f93dce0d7 1-359,361-364,368,370
+  s_075a1c1cfcebe4::t_25dbdc6fa72ef3 360,365-367,369,371
+classifier.py
+  s_075a1c1cfcebe4::t_d70bda086947d9 1,11,21-22,25,48,54-55,68,70,73,76-93,102-103,106-107,109-111,127-129,131,133-137,139-140,142-143,145-146,150,153-157,159-161,163,166,168-169,177-180,185-193
+  s_075a1c1cfcebe4::t_544ee95d7a3769 46-47
+  s_075a1c1cfcebe4::t_53c1e5d650e022 141
+run.py
+  s_075a1c1cfcebe4::t_3076fa71cd1a8f 8,30,32-33,36,39,42,44-47,49-50,53,57,60,63,78-80,83-84,86-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "ce9166af179da8e64d49c55bd493780a817e9ab2",
+  "prompts": {},
+  "sessions": {
+    "s_075a1c1cfcebe4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_11a152d28ffezH5la6alpD0lTi",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
