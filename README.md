@@ -1,6 +1,6 @@
-# SynthGen — Pre-Production Test Suite for AI Agents
+# Precog — Pre-Production Test Suite for AI Agents
 
-Agnost tells you what's broken AFTER users get hurt. SynthGen predicts what WILL break before deploy.
+Agnost tells you what's broken AFTER users get hurt. Precog predicts what WILL break before deploy.
 
 ---
 
@@ -10,7 +10,7 @@ AI agents go live untested. No test suite. No QA. No regression. You only find o
 
 Agnost solves the detection problem — it reads conversations and surfaces what's breaking. But by the time Agnost knows, users are already frustrated.
 
-SynthGen fills the pre-production gap: a structured test suite, built from real user complaints, delivered before your agent ever talks to a real customer.
+Precog fills the pre-production gap: a structured test suite, built from real user complaints, delivered before your agent ever talks to a real customer.
 
 ---
 
@@ -128,8 +128,8 @@ This is an actual test case from `output/groww_test_suite.json` — a real user 
 
 ## What Makes It Different
 
-| Other approaches | SynthGen |
-|---|---|
+| Other approaches | Precog |
+|---|---|---|
 | Generate fake conversations with LLM | **Real complaints** from competitor apps' Google Play reviews |
 | 3 vague intents | **15 granular intents** with atomic failure modes per sector |
 | "This tests technical issues" | `order_execution:slippage_acknowledgment` — machine-actionable |
