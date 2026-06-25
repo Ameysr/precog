@@ -1,4 +1,4 @@
-"""Classifies real reviews with auto-fix-ready schema: has bad response, fix target, verification."""
+"""Agent-type and dimension-aware classifier. Generates test cases for any agent type across all dimensions."""
 
 import json
 import random
@@ -9,7 +9,9 @@ from pydantic import BaseModel
 
 from utils import call_llm, save_json
 from sectors import load_sector_raw_reviews
-from taxonomy import get_intents_for_sector
+from taxonomy import get_intents_for_sector, get_taxonomy_for_agent, generate_dimension_test_templates
+from agent_types import AgentType, TestDimension, DIMENSION_DESCRIPTIONS, get_failure_types_for_dimension
+from schemas import TestCase
 
 OUTPUT_DIR = Path("output")
 
@@ -18,7 +20,7 @@ GIBBERISH_PATTERNS = [
     r"everyone alogorithms",
     r"soo much faster download",
     r"thank you so much to everyone",
-    r"\u2764\ufe0f",  # heart emoji followed by nothing useful
+    r"\u2764\ufe0f",
     r"bhot vadia",
     r"nice ho",
 ]
@@ -31,6 +33,7 @@ class ClassifiedReview(BaseModel):
     persona_match: str
     intent_match: str
     intent_match_id: str
+    dimension: str
     failure_mode: str
     severity: str
     current_bad_response: str
@@ -49,7 +52,6 @@ def _is_gibberish(text: str) -> bool:
     for p in GIBBERISH_PATTERNS:
         if re.search(p, text_lower):
             return True
-    # Check for gibberish: very short, repetitive, or mostly emoji
     words = text.split()
     if len(words) < 4 and len(text) < 30:
         return True
@@ -58,32 +60,34 @@ def _is_gibberish(text: str) -> bool:
     return False
 
 
-def _is_positive_review(text: str) -> bool:
-    positive_signals = ["love the app", "excellent", "amazing", "soo good", "very nice", "best app", "works perfectly", "great experience", "my favorite"]
-    negative_signals = ["please fix", "not working", "issue", "problem", "bug", "error", "frustrat", "worst", "useless", "refund", "money stuck"]
-    text_lower = text.lower()
-    has_positive = any(s in text_lower for s in positive_signals)
-    has_negative = any(s in text_lower for s in negative_signals)
-    return has_positive and not has_negative
+def _build_dimension_prompt_section(agent_type: AgentType) -> str:
+    lines = []
+    for dim in TestDimension:
+        desc = DIMENSION_DESCRIPTIONS[dim]
+        failures = get_failure_types_for_dimension(dim)
+        lines.append(f"  - {dim.value}: {desc}")
+        lines.append(f"    Failure modes: {', '.join(failures)}")
+    return "\n".join(lines)
 
 
 def classify_reviews(
     sector_name: str,
     profile,
     sample_size: int = 100,
+    agent_type: AgentType = AgentType.CONVERSATIONAL,
+    target_dimension: TestDimension | None = None,
 ) -> list[ClassifiedReview]:
     raw_reviews = load_sector_raw_reviews(sector_name)
     if not raw_reviews:
         return []
 
-    # Filter gibberish first
     clean = [r for r in raw_reviews if not _is_gibberish(r.get("text", ""))]
     removed = len(raw_reviews) - len(clean)
     if removed:
         print(f"  Filtered {removed} gibberish reviews")
 
     sampled = random.sample(clean, min(sample_size, len(clean)))
-    print(f"  Classifying {len(sampled)} reviews...")
+    print(f"  Classifying {len(sampled)} reviews for {agent_type.value} / {target_dimension.value if target_dimension else 'all'}...")
 
     taxonomy_intents = get_intents_for_sector(sector_name)
 
@@ -92,9 +96,11 @@ def classify_reviews(
         for p in profile.personas
     )
     intents_str = "\n".join(
-        f"  - [{t['id']}] {t['name']}: {t['description']}. Failure modes: {', '.join(t['failure_modes'][:4])}."
+        f"  - [{t['id']}] {t['name']}: {t['description']}."
         for t in taxonomy_intents
     )
+
+    dim_section = _build_dimension_prompt_section(agent_type)
 
     all_classified = []
     batch_size = 5
@@ -106,38 +112,38 @@ def classify_reviews(
             for j, r in enumerate(batch)
         )
 
-        prompt = f"""You are building a test suite for {profile.company_name}'s AI agent. You must classify each real user review with auto-fix information.
+        prompt = f"""You are building a test suite for {profile.company_name}'s AI agent.
+Agent type: {agent_type.value} - {agent_type.value} agent
 
 PERSONAS served by this agent:
 {personas_str}
 
-GRANULAR INTENTS (use [id] to tag):
+INTENTS (use [id] to tag):
 {intents_str}
+
+TEST DIMENSIONS with failure modes (classify each review into the BEST dimension):
+{dim_section}
 
 For EACH review, provide:
 
-1. is_positive: true if this review is purely positive/praise with no complaint. false if there's any issue reported.
-2. persona_match: Which persona from the list matches best?
-3. intent_match_id: Which granular intent ID matches? Choose the CLOSEST match even if imperfect.
+1. is_positive: true if purely positive/praise with no issue.
+2. persona_match: Which persona matches best?
+3. intent_match_id: Which intent ID matches? Choose closest.
 4. intent_match: Human-readable name of that intent.
-5. failure_mode: Which specific failure mode from that intent's list does this show?
-6. severity: mild / medium / high / rage
-7. current_bad_response: What a BAD agent might say. Imagine a lazy/generic support agent. Write 1 sentence of a dismissive or unhelpful reply. Example: "Please clear your app cache and try again."
-8. expected_agent_behavior: List 2-4 concrete actions with tool/API calls. NOT vague steps. Examples:
-   - "call_withdrawal_api(transaction_id) → check if age > 24h → if yes, trigger_nodal_escalation()"
-   - "query_kyc_status(user_pan) → if 'REJECTED', explain_rejection_reason() → offer_reupload_link()"
-   - "pull_gtt_logs(order_id) → compare trigger_price vs LTP_timeline → show_user_timeline()"
-9. tests_capability: Single atomic capability in "domain:action" format.
-10. verification_scenarios: List 2-3 concrete scenarios that would test this fix.
-    Example: ["withdrawal_stuck_3_days_SBI", "withdrawal_stuck_1_day_within_TAT", "withdrawal_processed_but_not_credited"]
-11. why_it_matters: One sentence on how this case tests a specific auto-fix capability.
+5. dimension: Which test dimension best fits? memory_context / correctness / safety / reliability / quality
+6. failure_mode: Which specific failure mode from that dimension does this show?
+7. severity: mild / medium / high / rage
+8. current_bad_response: What a BAD agent might say (1 sentence).
+9. expected_agent_behavior: List 2-4 concrete actions for an {agent_type.value} agent.
+10. tests_capability: "domain:action" format.
+11. verification_scenarios: 2-3 concrete verification scenarios.
+12. why_it_matters: One sentence on why this case is important.
 
-CRITICAL LABELING RULES:
-- Bus/service complaints (e.g., bus was late) → NOT fraud. These are merchant_service_dispute or general_quality.
-- UI/UX complaints (e.g., button hard to find) → NOT notification_missing. These are ux_discoverability.
-- Payment success but reward/cashback missing → NOT dp_charges. These are referral_or_reward_dispute.
-- Positive reviews with no issue → is_positive=true, intent_match_id="no_failure", failure_mode="positive_sentiment"
-- If no intent matches closely, use the closest match anyway. Prefer false positive over no_match.
+LABELING RULES:
+- Bus/service complaints -> merchant_service_dispute or general_quality
+- UI/UX complaints -> ux_discoverability (quality dimension)
+- Payment success but reward missing -> referral_or_reward_dispute
+- Positive reviews -> is_positive=true, intent_match_id="no_failure", failure_mode="positive_sentiment"
 
 Reviews:
 {batch_text}
@@ -149,16 +155,17 @@ Return ONLY valid JSON matching this schema:
       "review_text": "...",
       "source_company": "...",
       "is_positive": false,
-      "persona_match": "persona name",
-      "intent_match": "intent name",
-      "intent_match_id": "intent id",
-      "failure_mode": "failure mode",
+      "persona_match": "...",
+      "intent_match": "...",
+      "intent_match_id": "...",
+      "dimension": "memory_context/correctness/safety/reliability/quality",
+      "failure_mode": "...",
       "severity": "mild/medium/high/rage",
-      "current_bad_response": "bad agent response",
-      "expected_agent_behavior": ["tool_call1", "tool_call2"],
+      "current_bad_response": "...",
+      "expected_agent_behavior": ["action1", "action2"],
       "tests_capability": "domain:action",
       "verification_scenarios": ["scenario1", "scenario2"],
-      "why_it_matters": "reason"
+      "why_it_matters": "..."
     }}
   ]
 }}"""
@@ -174,10 +181,14 @@ Return ONLY valid JSON matching this schema:
     return all_classified
 
 
-def build_test_suite(classified: list[ClassifiedReview], profile) -> dict:
-    """Organize into auto-fix-ready test suite."""
+def build_test_suite(
+    classified: list[ClassifiedReview],
+    profile,
+    agent_type: AgentType = AgentType.CONVERSATIONAL,
+) -> dict:
     by_intent_id = {}
     by_severity = {"mild": [], "medium": [], "high": [], "rage": []}
+    by_dimension = {d.value: [] for d in TestDimension}
     by_failure_mode = {}
     positives = []
     negatives = []
@@ -189,10 +200,11 @@ def build_test_suite(classified: list[ClassifiedReview], profile) -> dict:
         else:
             negatives.append(d)
             by_intent_id.setdefault(r.intent_match_id, []).append(d)
+            dim_key = r.dimension if r.dimension in by_dimension else "quality"
+            by_dimension[dim_key].append(d)
             by_severity.setdefault(r.severity, []).append(d)
             by_failure_mode.setdefault(r.failure_mode, []).append(d)
 
-    from taxonomy import get_intents_for_sector
     from sectors import get_sector_for_business_type
     sector = get_sector_for_business_type(profile.business_type) or get_sector_for_business_type(profile.company_name) or "unknown"
     taxonomy_intents = get_intents_for_sector(sector)
@@ -201,8 +213,21 @@ def build_test_suite(classified: list[ClassifiedReview], profile) -> dict:
     covered_ids = list(set(by_intent_id.keys()))
     missing_ids = [i for i in taxonomy_ids if i not in covered_ids]
 
+    dimension_stats = {}
+    for dim in TestDimension:
+        cases = by_dimension.get(dim.value, [])
+        all_failure_types = set(get_failure_types_for_dimension(dim))
+        tested_types = set(c["failure_mode"] for c in cases)
+        dimension_stats[dim.value] = {
+            "total_cases": len(cases),
+            "failure_types_tested": sorted(tested_types),
+            "failure_types_missing": sorted(all_failure_types - tested_types),
+            "pct_coverage": round(len(tested_types) / len(all_failure_types) * 100) if all_failure_types else 0,
+        }
+
     suite = {
         "target_company": profile.company_name,
+        "agent_type": agent_type.value,
         "sector": sector,
         "generated_at": __import__("datetime").datetime.now().isoformat(),
         "coverage": {
@@ -212,6 +237,7 @@ def build_test_suite(classified: list[ClassifiedReview], profile) -> dict:
                 "missing": missing_ids,
                 "pct": round(len([i for i in taxonomy_ids if i in covered_ids]) / len(taxonomy_ids) * 100) if taxonomy_ids else 0,
             },
+            "dimensions": dimension_stats,
             "failure_modes": {
                 "total": sum(len(t["failure_modes"]) for t in taxonomy_intents),
                 "unique_tested": len(by_failure_mode),
@@ -233,10 +259,49 @@ def build_test_suite(classified: list[ClassifiedReview], profile) -> dict:
         suite,
         filename=f"{profile.company_name.lower().replace(' ', '-')}_test_suite.json",
     )
-    print(f"\n  Coverage: {suite['coverage']['granular_intents']['pct']}% intents ({suite['coverage']['granular_intents']['covered']}/{suite['coverage']['granular_intents']['total']})")
+    print(f"\n  Coverage: {suite['coverage']['granular_intents']['pct']}% intents")
+    print(f"  Dimensions: {{k: v['total_cases'] for k, v in dimension_stats.items()}}")
     print(f"  Failure modes tested: {suite['coverage']['failure_modes']['unique_tested']} unique")
-    print(f"  Severity distribution: {suite['coverage']['by_severity']}")
+    print(f"  Severity: {suite['coverage']['by_severity']}")
     if missing_ids:
         print(f"  Gaps: {', '.join(missing_ids)}")
 
     return suite
+
+
+def classify_for_agent(
+    profile,
+    sector_name: str,
+    agent_type: AgentType = AgentType.CONVERSATIONAL,
+    sample_size: int = 100,
+) -> list[TestCase]:
+    classified = classify_reviews(
+        sector_name=sector_name,
+        profile=profile,
+        sample_size=sample_size,
+        agent_type=agent_type,
+    )
+    test_cases = []
+    for c in classified:
+        try:
+            dim = TestDimension(c.dimension) if c.dimension in [d.value for d in TestDimension] else TestDimension.QUALITY
+        except ValueError:
+            dim = TestDimension.QUALITY
+        test_cases.append(TestCase(
+            agent_type=agent_type,
+            dimension=dim,
+            scenario_label=f"{c.intent_match_id}:{c.failure_mode}",
+            scenario_description=c.review_text[:200],
+            prompt_sequence=[c.review_text],
+            failure_mode=c.failure_mode,
+            severity=c.severity,
+            persona_match=c.persona_match,
+            intent_match=c.intent_match,
+            intent_match_id=c.intent_match_id,
+            source_review=c.review_text,
+            verification_scenarios=c.verification_scenarios,
+            why_it_matters=c.why_it_matters,
+            expected_tool_calls=None,
+            expected_response_patterns=c.expected_agent_behavior,
+        ))
+    return test_cases
