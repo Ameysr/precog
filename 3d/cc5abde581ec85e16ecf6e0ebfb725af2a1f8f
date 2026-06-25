@@ -1,0 +1,23 @@
+safety_tests.py
+  s_434c5edf4dcb5c::t_86ff05f4172eea 1-145
+correctness_tests.py
+  s_434c5edf4dcb5c::t_db9895733d2838 1-185
+reliability_tests.py
+  s_434c5edf4dcb5c::t_722bc647ea2193 1-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3dcc5abde581ec85e16ecf6e0ebfb725af2a1f8f",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
