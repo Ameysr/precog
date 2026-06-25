@@ -1,0 +1,19 @@
+run.py
+  s_434c5edf4dcb5c::t_c8323e3a00ca5e 1-5,7-8,11-22,24,27-39,43-174,176-180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "0d3f73b86b417387513853ce59216251d4197c3f",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
