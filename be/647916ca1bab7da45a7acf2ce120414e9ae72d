@@ -1,0 +1,21 @@
+probe.py
+  s_434c5edf4dcb5c::t_a0f1d3b78bae0f 1-115
+evaluator.py
+  s_434c5edf4dcb5c::t_597c019d9787f5 1-159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "be647916ca1bab7da45a7acf2ce120414e9ae72d",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
