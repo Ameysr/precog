@@ -1,0 +1,19 @@
+quality.py
+  s_434c5edf4dcb5c::t_d9649a0b882c6c 1-2,6-8,23,66-95,97-102,115,132,134-146
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "33b7deed68a2511d2a63a9ff9bc781964fcf7d50",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
