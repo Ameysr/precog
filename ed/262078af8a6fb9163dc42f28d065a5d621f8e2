@@ -1,0 +1,19 @@
+memory_tests.py
+  s_434c5edf4dcb5c::t_8c91dd2236db5c 1-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "ed262078af8a6fb9163dc42f28d065a5d621f8e2",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
