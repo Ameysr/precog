@@ -1,0 +1,19 @@
+classifier.py
+  s_434c5edf4dcb5c::t_aaf89f18b11289 1,12-14,23,36,63-70,77-78,90,99,103-104,115-116,121,124-126,129-131,133-146,158-162,164-165,168,184-188,191,203-204,216-227,230,240,262-263,265,270-307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "43a88bd222272e1253780e3b7eebfb88f7af0a36",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
