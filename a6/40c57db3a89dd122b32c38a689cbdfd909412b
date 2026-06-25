@@ -1,0 +1,23 @@
+taxonomy.py
+  s_434c5edf4dcb5c::t_b9442679551951 1,3-75,78-85,88-103,107-115,117,131-151
+agent_types.py
+  s_434c5edf4dcb5c::t_a7311d1686eaec 1-132
+schemas.py
+  s_434c5edf4dcb5c::t_1d644a31674881 1-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "a640c57db3a89dd122b32c38a689cbdfd909412b",
+  "prompts": {},
+  "sessions": {
+    "s_434c5edf4dcb5c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_10087f071ffefHigdC2sLBiGnt",
+        "model": "unknown"
+      },
+      "human_author": "Amey Ranaware <ranaware.amey@gmail.com>"
+    }
+  }
+}
